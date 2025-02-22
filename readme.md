@@ -23,3 +23,13 @@ It's responsible for handling users authentication requests from the web, it hav
 ## About the deployment
 
 Both microservices was containerized with docker, and pushed to docker hub. Then the kubernetes definitions orchestrate the microservices for easy deployment in a cluster.
+
+## Environment variables
+
+```
+MONGODB_CONNECTION_URI: for mongodb database
+
+AUTH_API_ADDRESS: internal address for the auth microservice
+
+TOKEN_KEY: token for JWT encryption
+```
