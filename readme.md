@@ -2,7 +2,7 @@
 
 ![kubernetes cluster](./draw.png "kubernetes cluster")
 
-This is a authentication microservice project it's divided in two separated services that communicate with each other, they are:
+This is a authentication microservice project it's divided in two separated internal services that communicate with each other and a external mongo database, the internal services is:
 
 ## Auth-api
 
