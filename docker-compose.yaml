@@ -1,13 +1,13 @@
 version: "3"
 services:
   auth:
-    build: ./auth-api
+    build: ./auth-api-node
     ports:
       - "8000:3000"
     environment:
       TOKEN_KEY: "shouldbeverysecure"
   users:
-    build: ./users-api
+    build: ./users-api-node
     ports:
       - "8080:3000"
     environment:
