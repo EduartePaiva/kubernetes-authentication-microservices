@@ -15,5 +15,5 @@ func NewAuthHttpHandler(authService types.AuthService) *authHttpHandler {
 }
 
 func (h *authHttpHandler) RegisterRouter(router *http.ServeMux) {
-
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {})
 }
