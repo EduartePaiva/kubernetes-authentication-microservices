@@ -52,8 +52,10 @@ func (s *authService) VerifyPasswordHash(password, hashedPassword string) error 
 	}
 }
 func (s *authService) CreateToken() string {
-	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp": time.Now().Add(time.Hour).Unix(),
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		ExpiresAt: &jwt.NumericDate{
+			Time: time.Now().Add(time.Hour * 1),
+		},
 	})
 	token, err := t.SignedString(jtwPrivateKey)
 	if err != nil {
@@ -63,8 +65,13 @@ func (s *authService) CreateToken() string {
 	return token
 }
 func (s *authService) VerifyToken(token string) error {
-	jwt.NewParser()
-	// TODO verify func
-	return types.AuthError{Code: http.StatusNotImplemented, Message: "function not implemented"}
+	_, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		return []byte(jtwPrivateKey), nil
+	}, jwt.WithExpirationRequired(), jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}))
 
+	if err != nil {
+		log.Println(err)
+		return types.AuthError{Code: http.StatusUnauthorized, Message: "Could not verify token."}
+	}
+	return nil
 }

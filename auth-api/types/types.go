@@ -1,7 +1,7 @@
 package types
 
 type AuthService interface {
-	CreatePasswordHash(password string) error
+	CreatePasswordHash(password string) (string, error)
 	VerifyPasswordHash(password, hashedPassword string) error
 	CreateToken() string
 	VerifyToken(token string) error
