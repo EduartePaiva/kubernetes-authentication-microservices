@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/auth-api/handlers"
@@ -20,6 +21,6 @@ func (h *httpServer) Run() error {
 	authService := services.NewAuthService()
 	httpHandler := handlers.NewAuthHttpHandler(authService)
 	httpHandler.RegisterRouter(router)
-
+	log.Println("running http server on port", h.addr)
 	return http.ListenAndServe(h.addr, router)
 }

@@ -35,15 +35,49 @@ func (h *authHttpHandler) getHashedPassword(w http.ResponseWriter, r *http.Reque
 	}
 	hashedPass, err := h.authService.CreatePasswordHash(password)
 	if err != nil {
-		utils.HandleHttpError(err, w)
+		utils.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
 	common.WriteJSON(w, http.StatusOK, map[string]string{"hashed": hashedPass})
 
 }
-func (h *authHttpHandler) getToken(w http.ResponseWriter, r *http.Request) {
 
+type getTokenBody struct {
+	Password       string `json:"password"`
+	HashedPassword string `json:"hashedPassword"`
 }
-func (h *authHttpHandler) getTokenConfirmation(w http.ResponseWriter, r *http.Request) {
 
+func (h *authHttpHandler) getToken(w http.ResponseWriter, r *http.Request) {
+	requestBody := &getTokenBody{}
+	err := common.ParseJSON(r, requestBody)
+	if err != nil {
+		common.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	err = h.authService.VerifyPasswordHash(requestBody.Password, requestBody.HashedPassword)
+	if err != nil {
+		utils.HandleHttpError(err, w, http.StatusInternalServerError)
+		return
+	}
+	token := h.authService.CreateToken()
+	common.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
+}
+
+type getTokenConBody struct {
+	Token string `json:"token"`
+}
+
+func (h *authHttpHandler) getTokenConfirmation(w http.ResponseWriter, r *http.Request) {
+	requestBody := &getTokenConBody{}
+	err := common.ParseJSON(r, requestBody)
+	if err != nil {
+		common.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	err = h.authService.VerifyToken(requestBody.Token)
+	if err != nil {
+		utils.HandleHttpError(err, w, http.StatusInternalServerError)
+		return
+	}
+	common.WriteJSON(w, http.StatusOK, make(map[string]string))
 }

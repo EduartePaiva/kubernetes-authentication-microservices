@@ -8,11 +8,11 @@ import (
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 )
 
-func HandleHttpError(err error, w http.ResponseWriter) {
+func HandleHttpError(err error, w http.ResponseWriter, fallbackErrorCode int) {
 	authErr, ok := err.(types.AuthError)
 	if ok {
 		common.WriteError(w, authErr.Code, authErr)
 		return
 	}
-	common.WriteError(w, http.StatusInternalServerError, errors.New("something went wrong"))
+	common.WriteError(w, fallbackErrorCode, errors.New("something went wrong"))
 }
