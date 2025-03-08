@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/handlers"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/services"
 )
@@ -18,7 +19,8 @@ func NewHttpServer(addr string) *httpServer {
 
 func (h *httpServer) Run() error {
 	router := http.NewServeMux()
-	authService := services.NewUsersService()
+	mongo := db.NewActions()
+	authService := services.NewUsersService(mongo)
 	httpHandler := handlers.NewUsersHttpHandler(authService)
 	httpHandler.RegisterRouter(router)
 	log.Println("running http server on port", h.addr)
