@@ -54,7 +54,7 @@ const getTokenForUser = async (password, hashedPassword) => {
     createAndThrowError(err.message || "Failed to verify user.", code);
   }
 };
-
+//
 const createUser = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/EduartePaiva/kubernetes-authentication-microservices/auth-api/types"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -25,7 +24,7 @@ func (s *authService) CreatePasswordHash(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		log.Println(err)
-		return "", types.AuthError{
+		return "", common.HttpError{
 			Code:    http.StatusInternalServerError,
 			Message: "failed to create secure password.",
 		}
@@ -39,13 +38,13 @@ func (s *authService) VerifyPasswordHash(password, hashedPassword string) error 
 	case nil:
 		return nil
 	case bcrypt.ErrMismatchedHashAndPassword:
-		return types.AuthError{
+		return common.HttpError{
 			Code:    http.StatusUnauthorized,
 			Message: "Failed to verify password.",
 		}
 	default:
 		log.Println(err)
-		return types.AuthError{
+		return common.HttpError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to verify password.",
 		}
@@ -71,7 +70,7 @@ func (s *authService) VerifyToken(token string) error {
 
 	if err != nil {
 		log.Println(err)
-		return types.AuthError{Code: http.StatusUnauthorized, Message: "Could not verify token."}
+		return common.HttpError{Code: http.StatusUnauthorized, Message: "Could not verify token."}
 	}
 	return nil
 }

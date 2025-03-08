@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/auth-api/types"
-	"github.com/EduartePaiva/kubernetes-authentication-microservices/auth-api/utils"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 )
 
@@ -36,7 +35,7 @@ func (h *authHttpHandler) getHashedPassword(w http.ResponseWriter, r *http.Reque
 	}
 	hashedPass, err := h.authService.CreatePasswordHash(password)
 	if err != nil {
-		utils.HandleHttpError(err, w, http.StatusInternalServerError)
+		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
 	common.WriteJSON(w, http.StatusOK, map[string]string{"hashed": hashedPass})
@@ -57,7 +56,7 @@ func (h *authHttpHandler) getToken(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.authService.VerifyPasswordHash(requestBody.Password, requestBody.HashedPassword)
 	if err != nil {
-		utils.HandleHttpError(err, w, http.StatusInternalServerError)
+		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
 	token := h.authService.CreateToken()
@@ -77,7 +76,7 @@ func (h *authHttpHandler) getTokenConfirmation(w http.ResponseWriter, r *http.Re
 	}
 	err = h.authService.VerifyToken(requestBody.Token)
 	if err != nil {
-		utils.HandleHttpError(err, w, http.StatusInternalServerError)
+		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
 	common.WriteJSON(w, http.StatusOK, make(map[string]string))
