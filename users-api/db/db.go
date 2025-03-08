@@ -10,6 +10,7 @@ import (
 
 type Actions interface {
 	CreateUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error)
+	GetUserByEmail(ctx context.Context, email string) (models.User, error)
 }
 
 func NewActions(client *sdk.Client) *mongo.MongoDB {

@@ -105,7 +105,7 @@ const verifyUser = async (req, res, next) => {
   } catch (err) {
     return next(err);
   }
-
+  //
   let existingUser;
   try {
     existingUser = await User.findOne({ email: email });

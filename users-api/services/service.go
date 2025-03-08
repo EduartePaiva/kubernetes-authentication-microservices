@@ -23,7 +23,6 @@ func (h *usersService) ValidateCredentials(email, password string) error {
 		len(strings.Trim(password, " ")) < 7 {
 		return common.HttpError{Code: http.StatusUnprocessableEntity, Message: "Invalid email or password."}
 	}
-
 	return nil
 }
 func (h *usersService) CheckUserExistence(email string) error {

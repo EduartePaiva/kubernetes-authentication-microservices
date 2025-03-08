@@ -2,7 +2,10 @@ package mongo
 
 import (
 	"context"
+	"errors"
+	"net/http"
 
+	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	sdk "go.mongodb.org/mongo-driver/v2/mongo"
@@ -13,7 +16,7 @@ type MongoDB struct {
 }
 
 const (
-	mongoDbName   = "db"
+	mongoDbName   = "kubernetes"
 	mongoColUsers = "users"
 )
 
@@ -41,4 +44,21 @@ func (m *MongoDB) CreateUser(ctx context.Context, email, hashedPassword string) 
 		ID:    id.String(),
 		Email: email,
 	}, nil
+}
+
+func (m *MongoDB) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+	user := models.User{}
+	err := m.client.
+		Database(mongoDbName).
+		Collection(mongoColUsers).
+		FindOne(ctx, bson.D{{Key: "email", Value: email}}).
+		Decode(&user)
+
+	if errors.Is(err, sdk.ErrNoDocuments) {
+		err = common.HttpError{
+			Code:    http.StatusUnprocessableEntity,
+			Message: "Failed to find and verify user for provided credentials.",
+		}
+	}
+	return user, err
 }

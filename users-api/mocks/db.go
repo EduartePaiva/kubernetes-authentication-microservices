@@ -16,3 +16,6 @@ func NewActionMock() *dbMock {
 func (m *dbMock) CreateUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error) {
 	return models.InsertUserResult{}, nil
 }
+func (m *dbMock) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+	return models.User{}, nil
+}
