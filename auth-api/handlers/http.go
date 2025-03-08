@@ -21,6 +21,7 @@ func (h *authHttpHandler) RegisterRouter(router *http.ServeMux) {
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		// health check
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
 	})
 	router.HandleFunc("GET /hashed-pw/{password}", h.getHashedPassword)
 	router.HandleFunc("GET /token", h.getToken)
