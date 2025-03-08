@@ -1,6 +1,6 @@
 package models
 
-type User struct {
-	Password string
-	Email    string
+type InsertUserResult struct {
+	ID    string
+	Email string
 }

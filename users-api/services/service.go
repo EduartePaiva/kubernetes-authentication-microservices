@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db/models"
 )
@@ -24,6 +26,6 @@ func (h *usersService) GetHashedPassword(password string) (string, error) {
 func (h *usersService) GetTokenForUser(password, hashedPassword string) (string, error) {
 	return "", nil
 }
-func (h *usersService) SaveUser(email, hashedPassword string) (models.User, error) {
-	return models.User{}, nil
+func (h *usersService) SaveUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error) {
+	return h.db.CreateUser(ctx, email, hashedPassword)
 }

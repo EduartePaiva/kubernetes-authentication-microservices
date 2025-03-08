@@ -1,6 +1,8 @@
 package types
 
 import (
+	"context"
+
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db/models"
 )
 
@@ -10,5 +12,5 @@ type UsersService interface {
 	CheckUserExistence(email string) error
 	GetHashedPassword(password string) (string, error)
 	GetTokenForUser(password, hashedPassword string) (string, error)
-	SaveUser(email, hashedPassword string) (models.User, error)
+	SaveUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error)
 }

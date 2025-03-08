@@ -52,7 +52,7 @@ func (h *usersHttpHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
-	user, err := h.service.SaveUser(cred.Email, hashedPassword)
+	user, err := h.service.SaveUser(r.Context(), cred.Email, hashedPassword)
 	if err != nil {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
@@ -63,9 +63,9 @@ func (h *usersHttpHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		"message": "User created.",
 		"user": map[string]string{
 			"email": user.Email,
+			"id":    user.ID,
 		},
 	})
-
 }
 func (h *usersHttpHandler) verifyUser(w http.ResponseWriter, r *http.Request) {
 
