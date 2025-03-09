@@ -25,7 +25,15 @@ func (h *usersService) ValidateCredentials(email, password string) error {
 	}
 	return nil
 }
-func (h *usersService) CheckUserExistence(email string) error {
+func (h *usersService) CheckUserExistence(ctx context.Context, email string) error {
+	_, err := h.db.GetUserByEmail(ctx, email)
+	_, ok := err.(common.HttpError)
+	if ok {
+		return common.HttpError{Message: "Failed to create user.", Code: http.StatusUnprocessableEntity}
+	}
+	if err != nil {
+		return common.HttpError{Message: "Failed to create user.", Code: http.StatusInternalServerError}
+	}
 	return nil
 }
 func (h *usersService) GetHashedPassword(password string) (string, error) {

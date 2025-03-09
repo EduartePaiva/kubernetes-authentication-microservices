@@ -56,8 +56,8 @@ func (m *MongoDB) GetUserByEmail(ctx context.Context, email string) (models.User
 
 	if errors.Is(err, sdk.ErrNoDocuments) {
 		err = common.HttpError{
-			Code:    http.StatusUnprocessableEntity,
-			Message: "Failed to find and verify user for provided credentials.",
+			Code:    http.StatusNotFound,
+			Message: "user not found",
 		}
 	}
 	return user, err
