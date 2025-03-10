@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -41,6 +42,10 @@ func (h *usersService) CheckUserExistence(ctx context.Context, email string) err
 	}
 	return nil
 }
+func (h *usersService) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+	return h.db.GetUserByEmail(ctx, email)
+}
+
 func (h *usersService) GetHashedPassword(ctx context.Context, password string) (string, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", authApiAddress+"/hashed-pw/"+password, nil)
 	if err != nil {
@@ -61,8 +66,30 @@ func (h *usersService) GetHashedPassword(ctx context.Context, password string) (
 	}
 	return body["hashed"], nil
 }
-func (h *usersService) GetTokenForUser(password, hashedPassword string) (string, error) {
-	return "", nil
+func (h *usersService) GetTokenForUser(ctx context.Context, password, hashedPassword string) (string, error) {
+	data := map[string]string{
+		"password":       password,
+		"hashedPassword": hashedPassword,
+	}
+	jBytes, _ := json.Marshal(&data)
+	req, err := http.NewRequestWithContext(ctx, "POST", authApiAddress+"/token", bytes.NewReader(jBytes))
+	if err != nil {
+		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to verify user."}
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to verify user."}
+	}
+	body := make(map[string]string)
+	err = json.NewDecoder(res.Body).Decode(&body)
+	if err != nil {
+		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to verify user."}
+	}
+	errBody, ok := body["error"]
+	if ok {
+		return "", common.HttpError{Code: res.StatusCode, Message: errBody}
+	}
+	return body["token"], nil
 }
 func (h *usersService) SaveUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error) {
 	return h.db.CreateUser(ctx, email, hashedPassword)

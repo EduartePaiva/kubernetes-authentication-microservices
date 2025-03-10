@@ -8,7 +8,7 @@ type InsertUserResult struct {
 }
 
 type User struct {
-	ID       bson.ObjectID `bson:"_id"`
-	Password string        `bson:"password"`
-	Email    string        `bson:"email"`
+	ID             bson.ObjectID `bson:"_id"`
+	HashedPassword string        `bson:"hashed_password"`
+	Email          string        `bson:"email"`
 }

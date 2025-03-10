@@ -67,6 +67,29 @@ func (h *usersHttpHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 }
-func (h *usersHttpHandler) verifyUser(w http.ResponseWriter, r *http.Request) {
 
+type verifyUserBody struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (h *usersHttpHandler) verifyUser(w http.ResponseWriter, r *http.Request) {
+	reqBody := verifyUserBody{}
+	err := common.ParseJSON(r, &reqBody)
+	if err != nil {
+		common.HandleHttpError(common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to parse request body"}, w, 500)
+		return
+	}
+
+	user, err := h.service.GetUserByEmail(r.Context(), reqBody.Email)
+	if err != nil {
+		common.HandleHttpError(err, w, 500)
+		return
+	}
+	token, err := h.service.GetTokenForUser(r.Context(), reqBody.Password, user.HashedPassword)
+	if err != nil {
+		common.HandleHttpError(err, w, 500)
+		return
+	}
+	common.WriteJSON(w, http.StatusOK, map[string]string{"token": token, "userId": user.ID.String()})
 }
