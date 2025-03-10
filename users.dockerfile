@@ -12,13 +12,13 @@ COPY common/go.mod common/go.mod
 WORKDIR /app/users-api
 RUN go mod download
 
-# copy extra files
+# copy external files
 WORKDIR /app
 COPY common/ common/
-COPY auth-api/ auth-api/
+COPY users-api/ users-api/
 
 # build go binary
-WORKDIR /app/auth-api
+WORKDIR /app/users-api
 RUN mkdir -p deploy
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./deploy/app ./
 
@@ -26,6 +26,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=build /app/auth-api/deploy/app /app/app
+COPY --from=build /app/users-api/deploy/app /app/app
 
 ENTRYPOINT [ "./app" ]

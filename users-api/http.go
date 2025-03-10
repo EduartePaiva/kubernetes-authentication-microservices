@@ -23,7 +23,7 @@ func NewHttpServer(addr string) *httpServer {
 
 func (h *httpServer) Run() error {
 	// create mongo mongoClient
-	mongoClient, err := mongo.Connect(options.Client().ApplyURI(common.EnvString("MONGODB_URI", "")))
+	mongoClient, err := mongo.Connect(options.Client().ApplyURI(common.EnvString("MONGODB_CONNECTION_URI", "")))
 	if err != nil {
 		log.Fatal(err)
 	}
