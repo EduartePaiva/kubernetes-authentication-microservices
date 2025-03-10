@@ -9,8 +9,8 @@ import (
 type UsersService interface {
 	// it returns a common.HttpError
 	ValidateCredentials(email, password string) error
-	CheckUserExistence(email string) error
-	GetHashedPassword(password string) (string, error)
+	CheckUserExistence(ctx context.Context, email string) error
+	GetHashedPassword(ctx context.Context, password string) (string, error)
 	GetTokenForUser(password, hashedPassword string) (string, error)
 	SaveUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error)
 }

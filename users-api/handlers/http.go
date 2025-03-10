@@ -42,12 +42,12 @@ func (h *usersHttpHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
-	err = h.service.CheckUserExistence(cred.Email)
+	err = h.service.CheckUserExistence(r.Context(), cred.Email)
 	if err != nil {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
-	hashedPassword, err := h.service.GetHashedPassword(cred.Password)
+	hashedPassword, err := h.service.GetHashedPassword(r.Context(), cred.Password)
 	if err != nil {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
