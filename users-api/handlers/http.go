@@ -42,9 +42,17 @@ func (h *usersHttpHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
 		return
 	}
-	err = h.service.CheckUserExistence(r.Context(), cred.Email)
+	ok, err := h.service.CheckUserExistence(r.Context(), cred.Email)
 	if err != nil {
 		common.HandleHttpError(err, w, http.StatusInternalServerError)
+		return
+	}
+	if ok {
+		common.HandleHttpError(
+			common.HttpError{Message: "Failed to create user.", Code: http.StatusUnprocessableEntity},
+			w,
+			500,
+		)
 		return
 	}
 	hashedPassword, err := h.service.GetHashedPassword(r.Context(), cred.Password)

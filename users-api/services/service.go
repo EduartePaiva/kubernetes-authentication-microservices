@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -31,16 +32,17 @@ func (h *usersService) ValidateCredentials(email, password string) error {
 	}
 	return nil
 }
-func (h *usersService) CheckUserExistence(ctx context.Context, email string) error {
+func (h *usersService) CheckUserExistence(ctx context.Context, email string) (bool, error) {
 	_, err := h.db.GetUserByEmail(ctx, email)
-	_, ok := err.(common.HttpError)
-	if ok {
-		return common.HttpError{Message: "Failed to create user.", Code: http.StatusUnprocessableEntity}
+	httpErr, ok := err.(common.HttpError)
+	if ok && httpErr.Code == http.StatusNotFound {
+		fmt.Println("happened here")
+		return false, nil
 	}
 	if err != nil {
-		return common.HttpError{Message: "Failed to create user.", Code: http.StatusInternalServerError}
+		return false, common.HttpError{Message: "Failed to create user.", Code: http.StatusInternalServerError}
 	}
-	return nil
+	return true, nil
 }
 func (h *usersService) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	return h.db.GetUserByEmail(ctx, email)

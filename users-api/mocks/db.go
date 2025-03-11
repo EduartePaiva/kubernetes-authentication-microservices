@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db/models"
+	"github.com/stretchr/testify/mock"
 )
 
 type dbMock struct {
+	mock.Mock
 }
 
 func NewActionMock() *dbMock {
@@ -17,5 +19,6 @@ func (m *dbMock) CreateUser(ctx context.Context, email, hashedPassword string) (
 	return models.InsertUserResult{}, nil
 }
 func (m *dbMock) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
-	return models.User{}, nil
+	args := m.Called(ctx, email)
+	return args.Get(0).(models.User), args.Error(1)
 }
