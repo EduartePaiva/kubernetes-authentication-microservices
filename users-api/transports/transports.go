@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
+	pb "github.com/EduartePaiva/kubernetes-authentication-microservices/common/api"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/types"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -70,21 +72,36 @@ func (r *restTransportSvc) GetTokenConfirmation(ctx context.Context, token strin
 	panic("unimplemented")
 }
 
-type gRPCTransportSvc struct{}
+type gRPCTransportSvc struct {
+	conn *grpc.ClientConn
+}
 
 // GetHashedPassword implements types.TransportsService.
 func (g *gRPCTransportSvc) GetHashedPassword(ctx context.Context, password string) (string, error) {
-	panic("unimplemented")
+	c := pb.NewAuthServiceClient(g.conn)
+	res, err := c.GetHashedPassword(ctx, &pb.GetHashedPasswordReq{
+		Password: password,
+	})
+	return res.HashedPassword, common.ConvertGrpcErrorToHttpError(err)
 }
 
 // GetToken implements types.TransportsService.
 func (g *gRPCTransportSvc) GetToken(ctx context.Context, password string, hashedPassword string) (string, error) {
-	panic("unimplemented")
+	c := pb.NewAuthServiceClient(g.conn)
+	res, err := c.GetToken(ctx, &pb.GetTokenReq{
+		Password:       password,
+		HashedPassword: hashedPassword,
+	})
+	return res.Token, common.ConvertGrpcErrorToHttpError(err)
 }
 
 // GetTokenConfirmation implements types.TransportsService.
 func (g *gRPCTransportSvc) GetTokenConfirmation(ctx context.Context, token string) (bool, error) {
-	panic("unimplemented")
+	c := pb.NewAuthServiceClient(g.conn)
+	res, err := c.GetTokenConfirmation(ctx, &pb.GetTokenConfirmationReq{
+		Token: token,
+	})
+	return res.IsValid, common.ConvertGrpcErrorToHttpError(err)
 }
 
 func NewTransportService(transportProtocol string) types.TransportsService {
