@@ -30,6 +30,11 @@ spec:
           image: eduartepaiva/kub-dep-users:latest
           env:
             - name: MONGODB_CONNECTION_URI
-              value: "mongodb+srv://mongo_connection_string"
-            - name: AUTH_API_ADDRESSS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-key
+                  key: MONGODB_CONNECTION_URI
+            - name: AUTH_API_ADDRESS
               value: "auth-service.default:3000"
+            - name: USERS_SERVER_PORT
+              value: "3000"

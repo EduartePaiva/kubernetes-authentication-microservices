@@ -31,3 +31,5 @@ spec:
           env:
             - name: TOKEN_KEY
               value: "shouldbeverysecure"
+            - name: AUTH_SERVER_PORT
+              value: "3000"
