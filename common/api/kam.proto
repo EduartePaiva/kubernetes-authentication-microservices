@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option go_package = "github.com/EduartePaiva/kubernetes-authentication-microservices/common/api";
+
+package api;
+
+service authService {
+    rpc GetHashedPassword(GetHashedPasswordReq) returns (GetHashedPasswordRes);
+    rpc GetToken(GetTokenReq) returns (GetTokenRes);
+    rpc GetTokenConfirmation(GetTokenConfirmationReq) returns (GetTokenConfirmationRes);
+
+}
+
+message GetHashedPasswordReq {
+    string Password = 1;
+}
+
+message GetHashedPasswordRes {
+    string HashedPassword = 1;
+}
+
+message GetTokenReq {
+    string Password = 1;
+    string HashedPassword = 2;
+}
+
+message GetTokenRes {
+    string Token = 1;
+}
+
+message GetTokenConfirmationReq {
+    string Token = 1;
+}
+
+message GetTokenConfirmationRes {
+    bool IsValid = 1;
+}
