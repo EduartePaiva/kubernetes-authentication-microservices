@@ -15,3 +15,9 @@ type UsersService interface {
 	SaveUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error)
 	GetUserByEmail(ctx context.Context, email string) (models.User, error)
 }
+
+type TransportsService interface {
+	GetHashedPassword(ctx context.Context, password string) (string, error)
+	GetToken(ctx context.Context, password, hashedPassword string) (string, error)
+	GetTokenConfirmation(ctx context.Context, token string) (bool, error)
+}

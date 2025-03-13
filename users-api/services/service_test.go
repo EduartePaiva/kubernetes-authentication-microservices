@@ -9,12 +9,14 @@ import (
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db/models"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/mocks"
+	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/transports"
 	"github.com/stretchr/testify/assert"
 )
 
 func createServiceForTest() *usersService {
 	dbMock := mocks.NewActionMock()
-	return NewUsersService(dbMock)
+	transport := transports.NewTransportService("REST")
+	return NewUsersService(dbMock, transport)
 }
 
 type testCasesValidadeCred struct {
@@ -55,7 +57,8 @@ func TestValidateCredentials(t *testing.T) {
 
 func TestCheckUserExistence(t *testing.T) {
 	dbMock := mocks.NewActionMock()
-	s := NewUsersService(dbMock)
+	transport := transports.NewTransportService("REST")
+	s := NewUsersService(dbMock, transport)
 
 	t.Run("when email exists in database", func(t *testing.T) {
 		ctx := context.Background()

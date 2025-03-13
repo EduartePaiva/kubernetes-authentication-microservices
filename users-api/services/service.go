@@ -1,28 +1,23 @@
 package services
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/db/models"
+	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/types"
 )
 
 type usersService struct {
-	db db.Actions
+	db        db.Actions
+	transport types.TransportsService
 }
 
-var (
-	authApiAddress = common.EnvString("AUTH_API_ADDRESS", "http://localhost:3000")
-)
-
-func NewUsersService(db db.Actions) *usersService {
-	return &usersService{db: db}
+func NewUsersService(db db.Actions, transport types.TransportsService) *usersService {
+	return &usersService{db: db, transport: transport}
 }
 func (h *usersService) ValidateCredentials(email, password string) error {
 	if len(strings.Trim(email, " \n\t")) == 0 ||
@@ -36,7 +31,6 @@ func (h *usersService) CheckUserExistence(ctx context.Context, email string) (bo
 	_, err := h.db.GetUserByEmail(ctx, email)
 	httpErr, ok := err.(common.HttpError)
 	if ok && httpErr.Code == http.StatusNotFound {
-		fmt.Println("happened here")
 		return false, nil
 	}
 	if err != nil {
@@ -49,49 +43,10 @@ func (h *usersService) GetUserByEmail(ctx context.Context, email string) (models
 }
 
 func (h *usersService) GetHashedPassword(ctx context.Context, password string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", authApiAddress+"/hashed-pw/"+password, nil)
-	if err != nil {
-		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to create user."}
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to create user."}
-	}
-	body := make(map[string]string)
-	err = json.NewDecoder(res.Body).Decode(&body)
-	if err != nil {
-		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to create user."}
-	}
-	errBody, ok := body["error"]
-	if ok {
-		return "", common.HttpError{Code: res.StatusCode, Message: errBody}
-	}
-	return body["hashed"], nil
+	return h.transport.GetHashedPassword(ctx, password)
 }
 func (h *usersService) GetTokenForUser(ctx context.Context, password, hashedPassword string) (string, error) {
-	data := map[string]string{
-		"password":       password,
-		"hashedPassword": hashedPassword,
-	}
-	jBytes, _ := json.Marshal(&data)
-	req, err := http.NewRequestWithContext(ctx, "POST", authApiAddress+"/token", bytes.NewReader(jBytes))
-	if err != nil {
-		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to verify user."}
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to verify user."}
-	}
-	body := make(map[string]string)
-	err = json.NewDecoder(res.Body).Decode(&body)
-	if err != nil {
-		return "", common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to verify user."}
-	}
-	errBody, ok := body["error"]
-	if ok {
-		return "", common.HttpError{Code: res.StatusCode, Message: errBody}
-	}
-	return body["token"], nil
+	return h.transport.GetToken(ctx, password, hashedPassword)
 }
 func (h *usersService) SaveUser(ctx context.Context, email, hashedPassword string) (models.InsertUserResult, error) {
 	return h.db.CreateUser(ctx, email, hashedPassword)
