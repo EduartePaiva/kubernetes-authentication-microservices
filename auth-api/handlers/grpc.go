@@ -4,10 +4,9 @@ import (
 	"context"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/auth-api/types"
+	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	pb "github.com/EduartePaiva/kubernetes-authentication-microservices/common/api"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type grpcHandler struct {
@@ -21,12 +20,26 @@ func NewGRPCHandler(grpcServer *grpc.Server, service types.AuthService) {
 	pb.RegisterAuthServiceServer(grpcServer, handler)
 }
 
-func (h *grpcHandler) GetHashedPassword(context.Context, *pb.GetHashedPasswordReq) (*pb.GetHashedPasswordRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetHashedPassword not implemented")
+func (h *grpcHandler) GetHashedPassword(ctx context.Context, req *pb.GetHashedPasswordReq) (*pb.GetHashedPasswordRes, error) {
+	hashedPw, err := h.service.CreatePasswordHash(req.Password)
+	if err != nil {
+		return nil, common.ConvertHttpErrorToGrpcError(err)
+	}
+
+	return &pb.GetHashedPasswordRes{HashedPassword: hashedPw}, nil
 }
-func (h *grpcHandler) GetToken(context.Context, *pb.GetTokenReq) (*pb.GetTokenRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetToken not implemented")
+func (h *grpcHandler) GetToken(ctx context.Context, req *pb.GetTokenReq) (*pb.GetTokenRes, error) {
+	err := h.service.VerifyPasswordHash(req.Password, req.HashedPassword)
+	if err != nil {
+		return nil, common.ConvertHttpErrorToGrpcError(err)
+	}
+	token := h.service.CreateToken()
+	return &pb.GetTokenRes{Token: token}, nil
 }
-func (h *grpcHandler) GetTokenConfirmation(context.Context, *pb.GetTokenConfirmationReq) (*pb.GetTokenConfirmationRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTokenConfirmation not implemented")
+func (h *grpcHandler) GetTokenConfirmation(ctx context.Context, req *pb.GetTokenConfirmationReq) (*pb.GetTokenConfirmationRes, error) {
+	err := h.service.VerifyToken(req.Token)
+	if err != nil {
+		return nil, common.ConvertHttpErrorToGrpcError(err)
+	}
+	return &pb.GetTokenConfirmationRes{IsValid: true}, nil
 }
