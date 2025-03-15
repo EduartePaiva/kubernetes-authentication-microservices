@@ -20,4 +20,5 @@ type TransportsService interface {
 	GetHashedPassword(ctx context.Context, password string) (string, error)
 	GetToken(ctx context.Context, password, hashedPassword string) (string, error)
 	GetTokenConfirmation(ctx context.Context, token string) (bool, error)
+	Close()
 }

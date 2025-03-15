@@ -17,7 +17,7 @@ func main() {
 		httpServer := NewHttpServer(":" + SERVER_PORT)
 		log.Fatal(httpServer.Run())
 	case "gRPC":
-		gRPCServer := NewGRPCServer(":" + SERVER_PORT)
+		gRPCServer := NewGRPCServer("localhost:" + SERVER_PORT)
 		log.Fatal(gRPCServer.Run())
 	default:
 		log.Println("supported communication protocols are REST and gRPC")

@@ -38,3 +38,5 @@ spec:
               value: "auth-service.default:3000"
             - name: USERS_SERVER_PORT
               value: "3000"
+            - name: COMMUNICATION_PROTOCOL
+              value: gRPC

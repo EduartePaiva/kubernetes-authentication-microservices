@@ -41,6 +41,7 @@ func (h *httpServer) Run() error {
 	router := http.NewServeMux()
 	mongo := db.NewActions(mongoClient)
 	transport := transports.NewTransportService(COMMUNICATION_PROTOCOL)
+	defer transport.Close()
 	usersService := services.NewUsersService(mongo, transport)
 	httpHandler := handlers.NewUsersHttpHandler(usersService)
 	httpHandler.RegisterRouter(router)

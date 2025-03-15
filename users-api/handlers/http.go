@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/types"
@@ -84,12 +86,14 @@ type verifyUserBody struct {
 func (h *usersHttpHandler) verifyUser(w http.ResponseWriter, r *http.Request) {
 	reqBody := verifyUserBody{}
 	err := common.ParseJSON(r, &reqBody)
-	if err != nil {
+	if err != nil || reqBody.Email == "" || reqBody.Password == "" {
 		common.HandleHttpError(common.HttpError{Code: http.StatusInternalServerError, Message: "Failed to parse request body"}, w, 500)
 		return
 	}
 
-	user, err := h.service.GetUserByEmail(r.Context(), reqBody.Email)
+	timedCtx, cancel := context.WithDeadline(r.Context(), time.Now().Add(time.Second*5))
+	defer cancel()
+	user, err := h.service.GetUserByEmail(timedCtx, reqBody.Email)
 	if err != nil {
 		common.HandleHttpError(err, w, 500)
 		return

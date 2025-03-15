@@ -56,7 +56,7 @@ func (s *authService) CreateToken() string {
 			Time: time.Now().Add(time.Hour * 1),
 		},
 	})
-	token, err := t.SignedString(jtwPrivateKey)
+	token, err := t.SignedString([]byte(jtwPrivateKey))
 	if err != nil {
 		log.Println(err)
 		panic("something is wrong with your code, fix it")

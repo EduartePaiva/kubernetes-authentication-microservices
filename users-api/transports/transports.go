@@ -4,12 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	pb "github.com/EduartePaiva/kubernetes-authentication-microservices/common/api"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/users-api/types"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -17,6 +21,11 @@ var (
 )
 
 type restTransportSvc struct{}
+
+// Close implements types.TransportsService.
+func (r *restTransportSvc) Close() {
+	log.Println("http don't need to close unimplemented")
+}
 
 // GetHashedPassword implements types.TransportsService.
 func (r *restTransportSvc) GetHashedPassword(ctx context.Context, password string) (string, error) {
@@ -76,6 +85,11 @@ type gRPCTransportSvc struct {
 	conn *grpc.ClientConn
 }
 
+// Close implements types.TransportsService.
+func (g *gRPCTransportSvc) Close() {
+	g.conn.Close()
+}
+
 // GetHashedPassword implements types.TransportsService.
 func (g *gRPCTransportSvc) GetHashedPassword(ctx context.Context, password string) (string, error) {
 	c := pb.NewAuthServiceClient(g.conn)
@@ -87,11 +101,21 @@ func (g *gRPCTransportSvc) GetHashedPassword(ctx context.Context, password strin
 
 // GetToken implements types.TransportsService.
 func (g *gRPCTransportSvc) GetToken(ctx context.Context, password string, hashedPassword string) (string, error) {
+	fmt.Println(g.conn)
+	fmt.Println(g.conn.GetState())
+	if g.conn.GetState() == connectivity.Shutdown {
+		log.Println("Connection is closed. Need to reconnect.")
+		return "", common.HttpError{
+			Message: "client connection is lost",
+			Code:    http.StatusInternalServerError,
+		}
+	}
+
 	c := pb.NewAuthServiceClient(g.conn)
 	res, err := c.GetToken(ctx, &pb.GetTokenReq{
 		Password:       password,
 		HashedPassword: hashedPassword,
-	})
+	}, grpc.WaitForReady(true))
 	return res.Token, common.ConvertGrpcErrorToHttpError(err)
 }
 
@@ -109,7 +133,19 @@ func NewTransportService(transportProtocol string) types.TransportsService {
 	case "REST":
 		return &restTransportSvc{}
 	case "gRPC":
-		return &gRPCTransportSvc{}
+		// exploring client side load balancing
+		grpcConn, err := grpc.NewClient(
+			common.EnvString("AUTH_API_ADDRESS", "localhost:3000"),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
+		)
+		if err != nil {
+			panic(err)
+		}
+
+		return &gRPCTransportSvc{
+			conn: grpcConn,
+		}
 	}
 	panic("only 'REST' or 'gRPC' are valid communication protocol")
 }
