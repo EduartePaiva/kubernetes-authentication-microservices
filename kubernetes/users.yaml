@@ -28,6 +28,7 @@ spec:
       containers:
         - name: users-api
           image: eduartepaiva/kub-dep-users:latest
+          imagePullPolicy: Always
           env:
             - name: MONGODB_CONNECTION_URI
               valueFrom:
@@ -35,7 +36,7 @@ spec:
                   name: mongo-key
                   key: MONGODB_CONNECTION_URI
             - name: AUTH_API_ADDRESS
-              value: "auth-service.default:3000"
+              value: "auth-service.default"
             - name: USERS_SERVER_PORT
               value: "3000"
             - name: COMMUNICATION_PROTOCOL

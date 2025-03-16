@@ -6,9 +6,10 @@ spec:
   selector:
     app: auth
   type: ClusterIP
+  clusterIP: None
   ports:
     - protocol: TCP
-      port: 3000
+      port: 50051
       targetPort: 3000
 ---
 apiVersion: apps/v1
@@ -16,7 +17,7 @@ kind: Deployment
 metadata:
   name: auth-deployment
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: auth
@@ -28,6 +29,7 @@ spec:
       containers:
         - name: auth-api
           image: eduartepaiva/kub-dep-auth:latest
+          imagePullPolicy: Always
           env:
             - name: TOKEN_KEY
               value: "shouldbeverysecure"

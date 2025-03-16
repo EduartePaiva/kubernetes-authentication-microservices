@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
 	pb "github.com/EduartePaiva/kubernetes-authentication-microservices/common/api"
@@ -101,8 +101,8 @@ func (g *gRPCTransportSvc) GetHashedPassword(ctx context.Context, password strin
 
 // GetToken implements types.TransportsService.
 func (g *gRPCTransportSvc) GetToken(ctx context.Context, password string, hashedPassword string) (string, error) {
-	fmt.Println(g.conn)
-	fmt.Println(g.conn.GetState())
+	// fmt.Println(g.conn)
+	// fmt.Println(g.conn.GetState())
 	if g.conn.GetState() == connectivity.Shutdown {
 		log.Println("Connection is closed. Need to reconnect.")
 		return "", common.HttpError{
@@ -110,9 +110,10 @@ func (g *gRPCTransportSvc) GetToken(ctx context.Context, password string, hashed
 			Code:    http.StatusInternalServerError,
 		}
 	}
-
+	ctxWithTime, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 	c := pb.NewAuthServiceClient(g.conn)
-	res, err := c.GetToken(ctx, &pb.GetTokenReq{
+	res, err := c.GetToken(ctxWithTime, &pb.GetTokenReq{
 		Password:       password,
 		HashedPassword: hashedPassword,
 	}, grpc.WaitForReady(true))

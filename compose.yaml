@@ -7,6 +7,9 @@ services:
       TOKEN_KEY: "shouldbeverysecure"
       AUTH_SERVER_PORT: "3000"
       COMMUNICATION_PROTOCOL: "gRPC"
+    deploy:
+      mode: replicated
+      replicas: 4
   users:
     depends_on:
       - auth
@@ -16,7 +19,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      MONGODB_CONNECTION_URI: ${MONGODB_CONNECTION_URI}
-      AUTH_API_ADDRESS: "http://auth:3000"
+      AUTH_API_ADDRESS: "dns:///auth:3000"
       USERS_SERVER_PORT: "3001"
       COMMUNICATION_PROTOCOL: "gRPC"
+      MONGODB_CONNECTION_URI: ${MONGODB_CONNECTION_URI}

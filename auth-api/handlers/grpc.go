@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/auth-api/types"
 	"github.com/EduartePaiva/kubernetes-authentication-microservices/common"
@@ -29,6 +30,7 @@ func (h *grpcHandler) GetHashedPassword(ctx context.Context, req *pb.GetHashedPa
 	return &pb.GetHashedPasswordRes{HashedPassword: hashedPw}, nil
 }
 func (h *grpcHandler) GetToken(ctx context.Context, req *pb.GetTokenReq) (*pb.GetTokenRes, error) {
+	log.Println("getting jwt token for user")
 	err := h.service.VerifyPasswordHash(req.Password, req.HashedPassword)
 	if err != nil {
 		return nil, common.ConvertHttpErrorToGrpcError(err)
