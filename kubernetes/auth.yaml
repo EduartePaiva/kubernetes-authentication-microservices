@@ -10,7 +10,7 @@ spec:
   ports:
     - protocol: TCP
       port: 50051
-      targetPort: 3000
+      targetPort: 50051
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,6 +34,6 @@ spec:
             - name: TOKEN_KEY
               value: "shouldbeverysecure"
             - name: AUTH_SERVER_PORT
-              value: "3000"
+              value: "50051"
             - name: COMMUNICATION_PROTOCOL
               value: gRPC

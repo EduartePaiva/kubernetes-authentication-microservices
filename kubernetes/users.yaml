@@ -36,7 +36,7 @@ spec:
                   name: mongo-key
                   key: MONGODB_CONNECTION_URI
             - name: AUTH_API_ADDRESS
-              value: "auth-service.default"
+              value: "dns:///auth-service.default:50051"
             - name: USERS_SERVER_PORT
               value: "3000"
             - name: COMMUNICATION_PROTOCOL
