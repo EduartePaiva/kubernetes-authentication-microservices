@@ -28,3 +28,7 @@ then access the test pod:
 kubectl exec -it dnsutils -- /bin/sh
 
 Then I can use nslookup inside it!!!.
+
+## creating the mongodb secret
+
+kubectl create secret generic mongo-key --from-literal=MONGODB_CONNECTION_URI=something
