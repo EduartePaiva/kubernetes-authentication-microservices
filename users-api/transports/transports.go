@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	authApiAddress = common.EnvString("AUTH_API_ADDRESS", "http://localhost:3000")
+	authApiAddress = common.EnvString("AUTH_API_ADDRESS", "localhost:3000")
 )
 
 type restTransportSvc struct{}
@@ -136,7 +136,7 @@ func NewTransportService(transportProtocol string) types.TransportsService {
 	case "gRPC":
 		// exploring client side load balancing
 		grpcConn, err := grpc.NewClient(
-			common.EnvString("AUTH_API_ADDRESS", "localhost:3000"),
+			authApiAddress,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
 		)
